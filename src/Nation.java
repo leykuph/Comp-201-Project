@@ -6,51 +6,32 @@ public class Nation {
     private City[] cities;
     private final File cityFile;
 
-    private int findIndex(String cityName) {
-        for (int i = 0; i < cities.length; i++) {
-            if (cityName.equals(cities[i].getName())) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
+    // O(n^2)
     private void readFile() throws FileNotFoundException {
         Scanner sc = new Scanner(cityFile);
         String currentLine;
-        int currentIndex = 0;
-        int cityCount = Integer.parseInt(sc.nextLine());
-        sc.nextLine();
-        cities = new City[cityCount];
-        int[] cityNeighbours = new int[cityCount];
-        for(int i = 0; i < cityCount; i++){
-            currentLine = sc.nextLine();
-            String[] parts = currentLine.split(",");
-            cities[currentIndex] = new City(parts[0]);
-            cityNeighbours[currentIndex] = Integer.parseInt(parts[1]);
-            currentIndex++;
+        currentLine = sc.nextLine();
+        String[] fields = currentLine.split(",");
+        cities = new City[fields.length-1];
+        for(int i = 1; i < fields.length; i++){
+            cities[i-1] = new City(fields[i]);
         }
-        currentIndex = 0;
-        for(int i = 0; i < cityCount; i++){
-            sc.nextLine();
-            for(int j = 0; j < cityNeighbours[i]; j++){
-                currentLine = sc.nextLine();
-                String[] parts = currentLine.split(",");
-                City neighbour = cities[findIndex(parts[0])];
-                double distance = Double.parseDouble(parts[1]);
-                cities[currentIndex].addNeighbour(neighbour, distance);
+        for (City city : cities) {
+            currentLine = sc.nextLine();
+            fields = currentLine.split(",");
+            for (int j = 1; j < fields.length; j++) {
+                city.addNeighbour(cities[j-1], Double.parseDouble(fields[j]));
             }
-            currentIndex++;
         }
     }
-
+    // O(1) theoretically
     Nation(String fileName) throws FileNotFoundException {
         cityFile = new File(fileName);
         if(!cityFile.exists() || !cityFile.isFile())
             throw new IllegalArgumentException("City file does not exist or is not a file");
         readFile();
     }
-
+    // O(1)
     City[] getCities() {
         return cities;
     }
