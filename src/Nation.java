@@ -20,9 +20,13 @@ public class Nation {
             currentLine = sc.nextLine();
             fields = currentLine.split(",");
             for (int j = 1; j < fields.length; j++) {
-                city.addNeighbour(cities[j-1], Double.parseDouble(fields[j]));
+                double d = Double.parseDouble(fields[j]);
+                if (d < 99999.0) {
+                    city.addNeighbour(cities[j - 1], d);
+                }
             }
         }
+        sc.close();
     }
     // O(1) theoretically
     Nation(String fileName) throws FileNotFoundException {
@@ -36,3 +40,4 @@ public class Nation {
         return cities;
     }
 }
+
