@@ -2,63 +2,80 @@ public class City {
 
     public static class Dictionary<E, F> {
         public static int BASE_CAPACITY = 2;
+
         private Object[] keys;
         private Object[] values;
-        private int index = 0;
+        private int size = 0;
+
         private final Class<E> keyClass;
         private final Class<F> valueClass;
+
         Dictionary(Class<E> keyClass, Class<F> valueClass) {
             this.keyClass = keyClass;
             this.valueClass = valueClass;
-            keys = new Object[0];
-            values = new Object[0];
+            // start with a non-zero capacity
+            keys = new Object[BASE_CAPACITY];
+            values = new Object[BASE_CAPACITY];
         }
-        // O(n)
+
+        // O(n) when resizing, O(1) amortized
         public void put(E key, F value) {
-            if(index == keys.length){
-                Object[] temp1 = new Object[keys.length*2];
-                Object[] temp2 = new Object[values.length*2];
-                for(int i = 0; i < keys.length; i++){
+            if (size == keys.length) {
+                // handle zero length safely, and grow
+                int newCap = (keys.length == 0) ? BASE_CAPACITY : keys.length * 2;
+
+                Object[] temp1 = new Object[newCap];
+                Object[] temp2 = new Object[newCap];
+
+                for (int i = 0; i < size; i++) {
                     temp1[i] = keys[i];
                     temp2[i] = values[i];
                 }
                 keys = temp1;
                 values = temp2;
             }
-            keys[index] = key;
-            values[index] = value;
-            index++;
+
+            keys[size] = key;
+            values[size] = value;
+            size++;
         }
+
         // O(1)
-        public int getIndex(){
-            return index;
+        public int getIndex() {
+            return size;
         }
-        // O(1)
+
+        // logical size, not capacity
         public int size() {
-            return keys.length;
+            return size;
         }
+
         // O(n)
         public F get(E e) {
-            for (int i = 0; i < keys.length; i++) {
-                if (keys[i] == e) {
-                    return (F)values[i];
+            for (int i = 0; i < size; i++) {   // use size, not keys.length
+                if (keys[i] == e) {            // reference equality is fine for City
+                    return (F) values[i];
                 }
             }
             return null;
         }
+
         // O(n)
         public E[] keys() {
-            E[] temp = (E[])java.lang.reflect.Array.newInstance(keyClass, keys.length);
-            for (int i = 0; i < keys.length; i++) {
-                temp[i] = (E)keys[i];
+            E[] temp = (E[]) java.lang.reflect.Array
+                    .newInstance(keyClass, size); // use size
+            for (int i = 0; i < size; i++) {
+                temp[i] = (E) keys[i];
             }
             return temp;
         }
+
         // O(n)
         public F[] values() {
-            F[] temp = (F[])java.lang.reflect.Array.newInstance(valueClass, values.length);
-            for (int i = 0; i < values.length; i++) {
-                temp[i] = (F)values[i];
+            F[] temp = (F[]) java.lang.reflect.Array
+                    .newInstance(valueClass, size); // use size
+            for (int i = 0; i < size; i++) {
+                temp[i] = (F) values[i];
             }
             return temp;
         }

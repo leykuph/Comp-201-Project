@@ -1,8 +1,4 @@
-import java.util.Arrays;
-import java.util.PriorityQueue;
-
 public class ShortestPathAlgorithms {
-
 
     public static class Path {
         private final City[] cities;
@@ -35,6 +31,18 @@ public class ShortestPathAlgorithms {
         }
     }
 
+    // Simple replacements for Arrays.fill
+    private static void fillInt(int[] array, int value) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = value;
+        }
+    }
+
+    private static void fillDouble(double[] array, double value) {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = value;
+        }
+    }
 
     private static Path buildPathFromParents(City[] cities,
                                              int[] parent,
@@ -64,7 +72,7 @@ public class ShortestPathAlgorithms {
         for (int i = 0; i < count - 1; i++) {   // O(n)
             City a = pathCities[i];
             City b = pathCities[i + 1];
-            Double wObj = a.getDistance(b);    
+            Double wObj = a.getDistance(b);
             double w = (wObj == null) ? 0.0 : wObj;
             totalDist += w;
         }
@@ -73,7 +81,6 @@ public class ShortestPathAlgorithms {
     }
 
     // ================== 1) DFS (any path) ======================
-
 
     public static Path dfs(Nation nation, String sourceName, String targetName) {
         City[] cities = nation.getCities();
@@ -95,7 +102,7 @@ public class ShortestPathAlgorithms {
 
         boolean[] visited = new boolean[n];
         int[] parent = new int[n];
-        Arrays.fill(parent, -1);      // O(n)
+        fillInt(parent, -1);      // O(n)
 
         int[] stack = new int[n];     // O(n)
         int top = -1;
@@ -105,7 +112,7 @@ public class ShortestPathAlgorithms {
 
         boolean found = false;
 
-        while (top >= 0) {           
+        while (top >= 0) {
             int u = stack[top--];
 
             if (u == t) {
@@ -114,8 +121,8 @@ public class ShortestPathAlgorithms {
             }
 
             City uCity = cities[u];
-            City[] neighbours = uCity.getNeighbours();  
-            for (City vCity : neighbours) {             
+            City[] neighbours = uCity.getNeighbours();
+            for (City vCity : neighbours) {
                 // Map neighbour to index O(n) scan
                 int v = -1;
                 for (int i = 0; i < n; i++) {
@@ -159,7 +166,8 @@ public class ShortestPathAlgorithms {
             throw new IllegalArgumentException("Source or target city not found");
         }
 
-        Path dijkstraPath = dijkstra(nation, sourceName, targetName); // O((n + m) log n)
+        // Dijkstra to get an initial upper bound
+        Path dijkstraPath = dijkstra(nation, sourceName, targetName); // O(n^2 + m*n) here
         if (dijkstraPath == null) {
             return null;
         }
@@ -173,6 +181,8 @@ public class ShortestPathAlgorithms {
 
         City[] dCities = dijkstraPath.getCities();
         bestLenHolder[0] = dCities.length;
+
+        // Map dijkstra path cities back to indices
         for (int i = 0; i < dCities.length; i++) {      // O(n^2) worst case for mapping
             for (int j = 0; j < n; j++) {
                 if (cities[j] == dCities[i]) {
@@ -197,7 +207,6 @@ public class ShortestPathAlgorithms {
 
         return new Path(pathCities, bestDistHolder[0]);
     }
-
 
     private static void dfsShortestRec(
             City[] cities,
@@ -228,7 +237,7 @@ public class ShortestPathAlgorithms {
         }
 
         City uCity = cities[u];
-        City[] neighbours = uCity.getNeighbours();   
+        City[] neighbours = uCity.getNeighbours();
         for (City vCity : neighbours) {
             // map neighbour to index O(n)
             int v = -1;
@@ -242,7 +251,7 @@ public class ShortestPathAlgorithms {
                 continue;
             }
 
-            Double wObj = uCity.getDistance(vCity);   
+            Double wObj = uCity.getDistance(vCity);
             if (wObj == null) {
                 continue;
             }
@@ -261,13 +270,13 @@ public class ShortestPathAlgorithms {
                            currentDist + w,
                            bestPath, bestLenHolder, bestDistHolder);
 
-            visited[v] = false;  
+            visited[v] = false;
         }
     }
 
     // ========================= 3) Dijkstra =========================
+    // Version without PriorityQueue, using O(n^2) selection.
 
-   
     public static Path dijkstra(Nation nation, String sourceName, String targetName) {
         City[] cities = nation.getCities();
         int n = cities.length;
@@ -290,28 +299,37 @@ public class ShortestPathAlgorithms {
         int[] parent = new int[n];
         boolean[] visited = new boolean[n];
 
-        Arrays.fill(dist, Double.POSITIVE_INFINITY); // O(n)
-        Arrays.fill(parent, -1);                     // O(n)
+        fillDouble(dist, Double.POSITIVE_INFINITY); // O(n)
+        fillInt(parent, -1);                        // O(n)
         dist[s] = 0.0;
 
-        PriorityQueue<Node> pq = new PriorityQueue<>(); // O(1) init
-        pq.add(new Node(s, 0.0));                       // O(log n)
+        // Standard O(n^2) Dijkstra without PQ
+        while (true) {
+            int u = -1;
+            double bestDist = Double.POSITIVE_INFINITY;
 
-        while (!pq.isEmpty()) {                         
-            Node node = pq.poll();                      // O(log n)
-            int u = node.index;
-
-            if (visited[u]) {
-                continue;
+            // Find unvisited vertex with smallest dist
+            for (int i = 0; i < n; i++) {
+                if (!visited[i] && dist[i] < bestDist) {
+                    bestDist = dist[i];
+                    u = i;
+                }
             }
-            visited[u] = true;
+
+            if (u == -1) {
+                // No reachable unvisited vertices left
+                break;
+            }
 
             if (u == t) {
-                break;  
+                // We reached the target; can stop early
+                break;
             }
 
+            visited[u] = true;
+
             City uCity = cities[u];
-            City[] neighbours = uCity.getNeighbours(); 
+            City[] neighbours = uCity.getNeighbours();
 
             for (City vCity : neighbours) {
                 // neighbour to index: O(n)
@@ -332,7 +350,7 @@ public class ShortestPathAlgorithms {
                 }
                 double w = wObj;
 
-                // IGNORE edges with distance 99999 
+                // IGNORE edges with distance 99999
                 if (w >= 99999.0) {
                     continue;
                 }
@@ -342,7 +360,6 @@ public class ShortestPathAlgorithms {
                 if (alt < dist[v]) {
                     dist[v] = alt;
                     parent[v] = u;
-                    pq.add(new Node(v, alt));           // O(log n)
                 }
             }
         }
@@ -352,21 +369,5 @@ public class ShortestPathAlgorithms {
         }
 
         return buildPathFromParents(cities, parent, s, t); // O(n)
-    }
-
-    //compareTo: O(1).
-    private static class Node implements Comparable<Node> {
-        int index;
-        double dist;
-
-        Node(int index, double dist) {
-            this.index = index;
-            this.dist = dist;
-        }
-
-        @Override
-        public int compareTo(Node other) {
-            return Double.compare(this.dist, other.dist);
-        }
     }
 }
