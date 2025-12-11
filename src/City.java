@@ -1,8 +1,10 @@
 public class City {
 
     public static class Dictionary<E, F> {
+        public static int BASE_CAPACITY = 2;
         private Object[] keys;
         private Object[] values;
+        private int index = 0;
         private final Class<E> keyClass;
         private final Class<F> valueClass;
         Dictionary(Class<E> keyClass, Class<F> valueClass) {
@@ -13,17 +15,23 @@ public class City {
         }
         // O(n)
         public void put(E key, F value) {
-            Object[] temp1 = new Object[keys.length + 1];
-            Object[] temp2 = new Object[values.length + 1];
-            for(int i = 0; i < keys.length; i++){
-                temp1[i] = keys[i];
-                temp2[i] = values[i];
+            if(index == keys.length){
+                Object[] temp1 = new Object[keys.length*2];
+                Object[] temp2 = new Object[values.length*2];
+                for(int i = 0; i < keys.length; i++){
+                    temp1[i] = keys[i];
+                    temp2[i] = values[i];
+                }
+                keys = temp1;
+                values = temp2;
             }
-            temp1[keys.length] = key;
-            temp2[values.length] = value;
-
-            keys = temp1;
-            values = temp2;
+            keys[index] = key;
+            values[index] = value;
+            index++;
+        }
+        // O(1)
+        public int getIndex(){
+            return index;
         }
         // O(1)
         public int size() {
