@@ -104,16 +104,15 @@ public class ShortestPathAlgorithms {
         int[] parent = new int[n];
         fillInt(parent, -1);      // O(n)
 
-        int[] stack = new int[n];     // O(n)
-        int top = -1;
+        MyStack<Integer> stack = new MyStack<>(n);
 
         visited[s] = true;
-        stack[++top] = s;
+        stack.push(s);
 
         boolean found = false;
 
-        while (top >= 0) {
-            int u = stack[top--];
+        while (!stack.isEmpty()) {
+            int u = stack.pop();
 
             if (u == t) {
                 found = true;
@@ -134,7 +133,7 @@ public class ShortestPathAlgorithms {
                 if (v != -1 && !visited[v]) {
                     visited[v] = true;
                     parent[v] = u;
-                    stack[++top] = v;
+                    stack.push(v);    
                 }
             }
         }
