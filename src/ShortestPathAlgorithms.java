@@ -166,63 +166,51 @@ public class ShortestPathAlgorithms {
     public static Path dfsShortest(Nation nation, String sourceName, String targetName) {
         City[] cities = nation.getCities();
         int n = cities.length;
-
-        // find indices O(n)
+    
+        // find indices
         int s = -1, t = -1;
         for (int i = 0; i < n; i++) {
-            if (cities[i].getName().equals(sourceName)) {
-                s = i;
-            }
-            if (cities[i].getName().equals(targetName)) {
-                t = i;
-            }
+            if (cities[i].getName().equals(sourceName)) s = i;
+            if (cities[i].getName().equals(targetName)) t = i;
         }
         if (s == -1 || t == -1) {
             throw new IllegalArgumentException("Source or target city not found");
         }
-
-        // Dijkstra to get an initial upper bound
-        Path dijkstraPath = dijkstra(nation, sourceName, targetName); // O(n^2 + m*n) here
-        if (dijkstraPath == null) {
-            return null;
-        }
-        double bestDistance = dijkstraPath.getTotalDistance();
-
+    
         boolean[] visited = new boolean[n];
         int[] currentPath = new int[n];
         int[] bestPath = new int[n];
-        int[] bestLenHolder = new int[1];
-        double[] bestDistHolder = new double[]{bestDistance};
-
-        City[] dCities = dijkstraPath.getCities();
-        bestLenHolder[0] = dCities.length;
-
-        // Map dijkstra path cities back to indices
-        for (int i = 0; i < dCities.length; i++) {      // O(n^2) worst case for mapping
-            for (int j = 0; j < n; j++) {
-                if (cities[j] == dCities[i]) {
-                    bestPath[i] = j;
-                    break;
-                }
-            }
-        }
-
+    
+        int[] bestLenHolder = new int[]{0};
+        double[] bestDistHolder = new double[]{Double.POSITIVE_INFINITY};
+    
         visited[s] = true;
         currentPath[0] = s;
-
-        dfsShortestRec(cities, s, t, visited,
-                       currentPath, 1, 0.0,
-                       bestPath, bestLenHolder, bestDistHolder);
-
-        int bestLen = bestLenHolder[0];
-        City[] pathCities = new City[bestLen];
-        for (int i = 0; i < bestLen; i++) {
+    
+        dfsShortestRec(
+            cities,
+            s,
+            t,
+            visited,
+            currentPath,
+            1,
+            0.0,
+            bestPath,
+            bestLenHolder,
+            bestDistHolder
+        );
+    
+        if (bestDistHolder[0] == Double.POSITIVE_INFINITY) {
+            return null;
+        }
+    
+        City[] pathCities = new City[bestLenHolder[0]];
+        for (int i = 0; i < bestLenHolder[0]; i++) {
             pathCities[i] = cities[bestPath[i]];
         }
-
+    
         return new Path(pathCities, bestDistHolder[0]);
     }
-
     private static void dfsShortestRec(
             City[] cities,
             int u,
