@@ -3,22 +3,26 @@ public class ShortestPathAlgorithms {
     public static class Path {
         private final City[] cities;
         private final double totalDistance;
-
-        public Path(City[] cities, double totalDistance) { // O(k)
+        
+        // O(n)
+        public Path(City[] cities, double totalDistance) { 
             this.cities = cities;
             this.totalDistance = totalDistance;
         }
-
-        public City[] getCities() { // O(1)
+        
+        // O(1)
+        public City[] getCities() { 
             return cities;
         }
-
-        public double getTotalDistance() { // O(1)
+        
+        // O(1)
+        public double getTotalDistance() { 
             return totalDistance;
         }
 
+        // O(n)
         @Override
-        public String toString() { // O(k)
+        public String toString() { 
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < cities.length; i++) {
                 sb.append(cities[i].getName());
@@ -32,12 +36,14 @@ public class ShortestPathAlgorithms {
     }
 
     // Simple replacements for Arrays.fill
+    // O(n)
     private static void fillInt(int[] array, int value) {
         for (int i = 0; i < array.length; i++) {
             array[i] = value;
         }
     }
-
+    
+    // O(n)
     private static void fillDouble(double[] array, double value) {
         for (int i = 0; i < array.length; i++) {
             array[i] = value;
@@ -51,9 +57,10 @@ public class ShortestPathAlgorithms {
         int n = cities.length;
         int[] reversed = new int[n];
         int count = 0;
-
+        
+        // O(n) in worst case
         int v = targetIndex;
-        while (v != -1) {          // O(n) in worst case
+        while (v != -1) {          
             reversed[count++] = v;
             if (v == sourceIndex) break;
             v = parent[v];
@@ -63,13 +70,19 @@ public class ShortestPathAlgorithms {
             return null;
         }
 
+        
         City[] pathCities = new City[count];
-        for (int i = 0; i < count; i++) {   // O(n)
+        
+        // O(n)
+        for (int i = 0; i < count; i++) {   
             pathCities[i] = cities[reversed[count - 1 - i]];
         }
 
+        
         double totalDist = 0.0;
-        for (int i = 0; i < count - 1; i++) {   // O(n)
+        
+        // O(n)
+        for (int i = 0; i < count - 1; i++) {   
             City a = pathCities[i];
             City b = pathCities[i + 1];
             Double wObj = a.getDistance(b);
@@ -80,13 +93,14 @@ public class ShortestPathAlgorithms {
         return new Path(pathCities, totalDist);
     }
 
-    // ================== 1) DFS (any path) ======================
+    // DFS ALGORITHM
 
     public static Path dfs(Nation nation, String sourceName, String targetName) {
         City[] cities = nation.getCities();
         int n = cities.length;
 
-        // find indices of source and target O(n)
+        // find indices of source and target
+        // O(n)
         int s = -1, t = -1;
         for (int i = 0; i < n; i++) {
             if (cities[i].getName().equals(sourceName)) {
@@ -101,8 +115,11 @@ public class ShortestPathAlgorithms {
         }
 
         boolean[] visited = new boolean[n];
+        
         int[] parent = new int[n];
-        fillInt(parent, -1);      // O(n)
+        
+        // O(n)
+        fillInt(parent, -1);      
 
         MyStack<Integer> stack = new MyStack<>(n);
 
@@ -145,8 +162,7 @@ public class ShortestPathAlgorithms {
         return buildPathFromParents(cities, parent, s, t);  // O(n)
     }
 
-    // ============== 2) DFS (shortest path) ================
-
+    // DFS-SHORTEST ALGORITHM
     public static Path dfsShortest(Nation nation, String sourceName, String targetName) {
         City[] cities = nation.getCities();
         int n = cities.length;
@@ -221,7 +237,7 @@ public class ShortestPathAlgorithms {
 
         int n = cities.length;
 
-        // PRUNING: if current path already not better than best, stop
+        // if current path already not better than best, stop
         if (currentDist >= bestDistHolder[0]) {
             return;
         }
@@ -273,7 +289,7 @@ public class ShortestPathAlgorithms {
         }
     }
 
-    // ========================= 3) Dijkstra =========================
+    // DJIKSTRA ALGORITHM
     // Version without PriorityQueue, using O(n^2) selection.
 
     public static Path dijkstra(Nation nation, String sourceName, String targetName) {
